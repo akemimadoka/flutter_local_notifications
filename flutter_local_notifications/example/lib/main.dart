@@ -147,7 +147,9 @@ Future<void> main() async {
 Future<void> _configureLocalTimeZone() async {
   tz.initializeTimeZones();
   final String timeZoneName = await platform.invokeMethod('getTimeZoneName');
-  tz.setLocalLocation(tz.getLocation(timeZoneName));
+  if (timeZoneName != null) {
+    tz.setLocalLocation(tz.getLocation(timeZoneName));
+  }
 }
 
 class PaddedRaisedButton extends StatelessWidget {
@@ -637,7 +639,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _showFullScreenNotification() async {
     await showDialog(
         context: context,
-        child: AlertDialog(
+        builder: (BuildContext context) => AlertDialog(
           title: const Text('Turn off your screen'),
           content: const Text(
               'to see the full-screen intent in 5 seconds, press OK and TURN '

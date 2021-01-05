@@ -36,9 +36,14 @@ static void my_application_activate(GApplication* application) {
     const std::string_view method = fl_method_call_get_name(method_call);
     g_autoptr(FlMethodResponse) response = nullptr;
     if (method == "getTimeZoneName") {
+#if GLIB_CHECK_VERSION(2, 58, 0)
       g_autoptr(GTimeZone) tz = g_time_zone_new_local();
       const auto tzId = g_time_zone_get_identifier(tz);
       g_autoptr(FlValue) result = fl_value_new_string(tzId);
+#else
+      FlValue* result = nullptr;
+#endif
+
       response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
     } else {
       response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());

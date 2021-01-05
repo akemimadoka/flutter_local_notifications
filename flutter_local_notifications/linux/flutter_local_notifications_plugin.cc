@@ -60,6 +60,7 @@ namespace {
     return result;
   }
 
+#if GLIB_CHECK_VERSION(2, 58, 0)
   GDateTime* GetNextNotifyTime(GDateTime* now, GDateTime* value, DateTimeComponents component) {
     const auto usingTimeZone = g_date_time_get_timezone(now);
     const auto nowTimeStamp = g_date_time_to_unix(now);
@@ -80,6 +81,7 @@ namespace {
     g_autoptr(GDateTime) utcResult = g_date_time_new_from_unix_utc(nowTimeStamp + diff);
     return g_date_time_to_timezone(utcResult, usingTimeZone);
   }
+#endif
 
   GIcon* CreateIconFromFlValue(FlValue* v) {
     const auto icon = fl_value_lookup_string(v, "icon");
@@ -281,6 +283,7 @@ struct _FlutterLocalNotificationsPlugin {
     periodic_notification_map->emplace(id, taskId);
   }
 
+#if GLIB_CHECK_VERSION(2, 58, 0)
   void doZonedSchedule(GApplication* app, std::int64_t id, GNotification*& notification, std::string&& notificationId, GDateTime* now, GDateTime* scheduledDateTime, std::optional<DateTimeComponents> matchDateTimeComponents) {
     if (matchDateTimeComponents) {
       const auto matchDateTimeComponentsValue = *matchDateTimeComponents;
@@ -325,6 +328,7 @@ struct _FlutterLocalNotificationsPlugin {
       periodic_notification_map->emplace(id, taskId);
     }
   }
+#endif
 
   struct CommonArguments {
     std::int64_t id;
@@ -402,6 +406,7 @@ struct _FlutterLocalNotificationsPlugin {
   }
 
   FlMethodResponse* zonedSchedule(FlMethodCall* call) {
+#if GLIB_CHECK_VERSION(2, 58, 0)
     const auto args = fl_method_call_get_args(call);
     RequireArg(args, FL_VALUE_TYPE_MAP);
 
@@ -435,6 +440,9 @@ struct _FlutterLocalNotificationsPlugin {
     doZonedSchedule(app, id, notification, std::move(notificationIdString), now, realScheduledDateTime,
       matchDateTimeComponents ? std::optional{ static_cast<DateTimeComponents>(fl_value_get_int(matchDateTimeComponents)) } : std::nullopt);
     return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+#else
+    return FL_METHOD_RESPONSE(fl_method_error_response_new("UnsupportedPlatform", "This feature requires glib 2.58.0, which is not satisfied", nullptr));
+#endif
   }
 
   FlMethodResponse* cancel(FlMethodCall* call) {

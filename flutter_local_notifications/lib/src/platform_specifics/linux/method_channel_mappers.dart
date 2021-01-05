@@ -16,8 +16,9 @@ extension LinuxIconMapper on LinuxIcon {
 extension LinuxInitializationSettingsMapper on LinuxInitializationSettings {
   Map<String, Object> toMap() => <String, Object>{
         'defaultIcon': defaultIcon?.toMap(),
-        'knownShowingNotifications':
-            Int64List.fromList(knownShowingNotifications?.toList()),
+        'knownShowingNotifications': knownShowingNotifications == null
+            ? null
+            : Int64List.fromList(knownShowingNotifications.toList()),
       };
 }
 
